@@ -1,0 +1,21 @@
+{
+  "name": "noderest",
+  "version": "0.9.0",
+  "description": "REST service for retrieving users and images",
+  "main": "server.js",
+  "scripts": {
+    "test": "test"
+  },
+  "dependencies": {
+    "body-parser": "~1.0.1",
+    "cookie-parser": "^1.4.3",
+    "cookies": "^0.7.1",
+    "express": "~4.0.0",
+    "mysql": "^2.15.0",
+    "node-fetch": "^1.7.3",
+    "requirejs-plugins": "^1.0.2",
+    "sha512": "0.0.1"
+  },
+  "author": "ErkHal",
+  "license": "ISC"
+}
