@@ -19,6 +19,7 @@ Value names of dbConfig.json:
 ```
 {
   "host": "HOSTNAME",
+  "user": "USERNAME",
   "password": "PASSWORD",
   "database": "DATABASE"
 }
