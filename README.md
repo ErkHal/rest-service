@@ -11,7 +11,7 @@ Technologies used:
 
 Author Erkki Halinen
 
-##How to setup
+## How to setup
 You need to provide a dbConfig.json for the MySQL database connection.
 It has to be in the root directory of the project.
 
