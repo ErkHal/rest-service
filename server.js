@@ -13,6 +13,7 @@ const sha512 = require('sha512');
 const cookies = require('cookies');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
+const formidable = require('express-formidable');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -25,16 +26,6 @@ const port = process.env.PORT || 8080;        // set our port
 /*
 Configure MySQL Database connection.
  */
- /*const getConf = async () => {
- const fetchConfig = await fetch('dbConfig.json');
- const conf = await fetchConfig.json();
- console.log("##########################" + conf);
- return conf;
-}
-
-  const conf = getConf(); */
-//Retrieve configurations from local JSON file
-
 const confFile = fs.readFileSync('dbConfig.json');
 const jsonConf = JSON.parse(confFile);
 
@@ -106,8 +97,7 @@ router.route('/users')
 .get((req, res) => {
 
   const auth = req.cookies['authtoken'];
-  console.log(auth);
-  console.log("Trying to access /users GET endpoint with: " + auth);
+  console.log("Trying to access /users GET endpoint");
   if(auth === undefined) {
     console.log('Unauthorized attempt at GET users');
     res.writeHead(403);
@@ -195,6 +185,32 @@ router.route('/logout')
   res.clearCookie('authtoken');
   res.end();
   console.log("Cleared cookies !");
+});
+
+/*############################################################################
+  UPLOAD service */
+
+router.route('/upload')
+
+.post((req, res) => {
+
+  console.log('Upload service in action !');
+
+  var form = new formidable.IncomingForm();
+
+    form.parse(req);
+
+    form.on('fileBegin', function (name, file){
+        file.path = __dirname + '/uploads/' + file.name;
+    });
+
+    form.on('file', function (name, file){
+        console.log('Uploaded ' + file.name);
+    });
+
+    res.writeHead(200);
+    res.write('Successful upload');
+    res.end();
 });
 
 /*#############################################################################
