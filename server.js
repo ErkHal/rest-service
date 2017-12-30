@@ -13,7 +13,8 @@ const sha512 = require('sha512');
 const cookies = require('cookies');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
-const formidable = require('express-formidable');
+const formidable = require('formidable');
+const shortid = require('shortid');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -26,14 +27,14 @@ const port = process.env.PORT || 8080;        // set our port
 /*
 Configure MySQL Database connection.
  */
-const confFile = fs.readFileSync('dbConfig.json');
-const jsonConf = JSON.parse(confFile);
+const restConfFile = fs.readFileSync('restConfig.json');
+const restConf = JSON.parse(restConfFile);
 
   const dbConnection = mysql.createConnection({
-     host: jsonConf.host,
-     user: jsonConf.user,
-     password: jsonConf.password,
-     database: jsonConf.database
+     host: restConf.host,
+     user: restConf.user,
+     password: restConf.password,
+     database: restConf.database
    });
 //Connect to database
    dbConnection.connect((err) => {
@@ -194,23 +195,76 @@ router.route('/upload')
 
 .post((req, res) => {
 
+  const auth = req.cookies['authtoken'];
+  console.log("Trying to access /upload POST endpoint");
+  if(auth === undefined) {
+    console.log('Unauthorized attempt at POST upload');
+    res.writeHead(403);
+    res.end();
+
+  } else {
+
   console.log('Upload service in action !');
 
-  var form = new formidable.IncomingForm();
+  const form = new formidable.IncomingForm();
 
-    form.parse(req);
+  form.parse(req,(err, fields, files) => {
 
-    form.on('fileBegin', function (name, file){
-        file.path = __dirname + '/uploads/' + file.name;
-    });
+    try {
 
-    form.on('file', function (name, file){
-        console.log('Uploaded ' + file.name);
-    });
+    form.multiples = false;
+    form.keepExtensions = true;
 
-    res.writeHead(200);
-    res.write('Successful upload');
-    res.end();
+    console.log("Uploading file " + files.image.name);
+
+    const oldpath = files.image.path;
+    const newpath = restConf.uploadDir + shortid.generate();
+
+    console.log(fields.title);
+
+//If the title is empty, dont upload the file.
+    if(fields.title === undefined) {
+      res.writeHead(403);
+      res.end();
+    } else {
+
+      fs.rename(oldpath, newpath,(err) => {
+         if (err) {
+           console.log("Couldn't move the file to the right directory");
+           console.log(err);
+           res.send(403);
+           res.end();
+         } else {
+         console.log('Uploaded ' + files.image.name);
+         /* Query for inserting the entry about the uploaded image */
+            const uploadQuery = "INSERT INTO images(TITLE, FILEPATH)" +
+              " VALUES (?, ?)";
+
+            dbConnection.query(uploadQuery, [fields.title, newpath], (err, result) => {
+
+              if(err) {
+
+                res.writeHead(403);
+                res.end();
+
+              } else {
+                console.log('Image entry inserted');
+                res.writeHead(200);
+                res.write('Image uploaded !');
+                res.end();
+                  }
+                });
+              }
+            });
+          }
+        } catch(e) {
+          console.log("Couldn't upload the file");
+          console.log(e);
+          res.write(403);
+          res.end();
+        }
+      });
+    }
 });
 
 /*#############################################################################

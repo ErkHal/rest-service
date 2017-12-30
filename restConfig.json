@@ -1,0 +1,7 @@
+{
+  "host" : "localhost",
+  "user" : "root",
+  "password" : "ukkoylijumala",
+  "database" : "noderest",
+  "uploadDir" : "C:/Users/Erkki/Documents/"
+}
