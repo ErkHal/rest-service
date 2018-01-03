@@ -204,8 +204,6 @@ router.route('/upload')
 
   } else {
 
-  console.log('Upload service in action !');
-
   const form = new formidable.IncomingForm();
 
   form.parse(req,(err, fields, files) => {
@@ -217,10 +215,10 @@ router.route('/upload')
 
     console.log("Uploading file " + files.image.name);
 
-    const oldpath = files.image.path;
-    const newpath = restConf.uploadDir + shortid.generate();
+    const fileType = files.image.type.split('/').pop();
 
-    console.log(fields.title);
+    const oldpath = files.image.path;
+    const newpath = restConf.uploadDir + shortid.generate() + '.' + fileType;
 
 //If the title is empty, dont upload the file.
     if(fields.title === undefined) {
@@ -265,6 +263,38 @@ router.route('/upload')
         }
       });
     }
+});
+
+/*############################################################################
+    Get all pictures */
+
+router.route('/images')
+
+.get((req, res) => {
+
+/*  const auth = req.cookies['authtoken'];
+  console.log("Trying to access /images GET endpoint");
+  if(auth === undefined) {
+    console.log('Unauthorized attempt at GET pictures');
+    res.writeHead(403);
+    res.end();
+
+  } else { */
+
+  const getAllImagesQuery = 'SELECT * FROM IMAGES';
+
+  dbConnection.query(getAllImagesQuery, (err, result) => {
+
+    if(err) {
+     console.log('ERROR at image retrieval' + err);
+   } else {
+     res.header('Access-Control-Allow-Origin', '*');
+     res.header('Access-Control-Allow-Methods', 'GET');
+     res.header('Access-Control-Allow-Headers', 'Content-Type');
+     res.json(result);
+      }
+    });
+  //}
 });
 
 /*#############################################################################
