@@ -36,6 +36,10 @@ const restConf = JSON.parse(restConfFile);
      password: restConf.password,
      database: restConf.database
    });
+
+//Configure the upload directory to be able to serve static content
+   app.use(express.static(restConf.uploadDir));
+
 //Connect to database
    dbConnection.connect((err) => {
      if (err) {
@@ -58,7 +62,7 @@ router.use((req, res, next) => {
 
 // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
 router.get('/',(req, res) => {
-    res.end('<h1> This is the root for node.js REST service prototype</h1>'
+    res.end('<h1> This is the root for Node.js REST service prototype</h1>'
     + '<h3>Author Erkki Halinen</h3>');
 });
 
@@ -272,16 +276,16 @@ router.route('/images')
 
 .get((req, res) => {
 
-/*  const auth = req.cookies['authtoken'];
+  const auth = req.cookies['authtoken'];
   console.log("Trying to access /images GET endpoint");
   if(auth === undefined) {
     console.log('Unauthorized attempt at GET pictures');
     res.writeHead(403);
     res.end();
 
-  } else { */
+  } else {
 
-  const getAllImagesQuery = 'SELECT * FROM IMAGES';
+  const getAllImagesQuery = 'SELECT * FROM images';
 
   dbConnection.query(getAllImagesQuery, (err, result) => {
 
@@ -294,7 +298,7 @@ router.route('/images')
      res.json(result);
       }
     });
-  //}
+  }
 });
 
 /*#############################################################################
