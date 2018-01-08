@@ -1,4 +1,12 @@
-// server.js
+/*
+  server.js
+
+  Author ErkHal https://github.com/ErkHal
+
+  Main server file for Node.js REST prototype project
+
+  https://github.com/ErkHal/rest-service
+ */
 
 // BASE SETUP
 // =============================================================================
@@ -15,6 +23,7 @@ const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const formidable = require('formidable');
 const shortid = require('shortid');
+const utils = require('./utils.js');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -54,8 +63,7 @@ const restConf = JSON.parse(restConfFile);
 const router = express.Router();              // get an instance of the express Router
 
 router.use((req, res, next) => {
-    // do logging
-    console.log('Got a new request !');
+    console.log('Request from ' + req.ip);
     next(); // make sure we go to the next routes and don't stop here
 });
 
@@ -101,27 +109,27 @@ router.route('/users')
 // Users need to be logged in to access this endpoint
 .get((req, res) => {
 
-  const auth = req.cookies['authtoken'];
-  console.log("Trying to access /users GET endpoint");
-  if(auth === undefined) {
-    console.log('Unauthorized attempt at GET users');
-    res.writeHead(403);
-    res.end();
-
-  } else {
+  if(utils.isLegit(req)) {
 
   const getAllQuery = "SELECT * FROM users";
 
   dbConnection.query(getAllQuery, (err, result) => {
+
     if(err) {
       console.log("Something fucked up at GET");
       console.log(err);
       res.send(err);
+      return;
 
-    } else {
+    }
+
       res.json(result);
-      }
     });
+
+  } else {
+
+    res.writeHead(403);
+    res.end();
   }
 });
 
@@ -199,14 +207,11 @@ router.route('/upload')
 
 .post((req, res) => {
 
-  const auth = req.cookies['authtoken'];
-  console.log("Trying to access /upload POST endpoint");
-  if(auth === undefined) {
-    console.log('Unauthorized attempt at POST upload');
+  if(!utils.isLegit(req)) {
     res.writeHead(403);
     res.end();
-
-  } else {
+    return;
+  }
 
   const form = new formidable.IncomingForm();
 
@@ -266,7 +271,6 @@ router.route('/upload')
           res.end();
         }
       });
-    }
 });
 
 /*############################################################################
@@ -276,14 +280,11 @@ router.route('/images')
 
 .get((req, res) => {
 
-  const auth = req.cookies['authtoken'];
-  console.log("Trying to access /images GET endpoint");
-  if(auth === undefined) {
-    console.log('Unauthorized attempt at GET pictures');
-    res.writeHead(403);
-    res.end();
-
-  } else {
+    if(!utils.isLegit(req)) {
+      res.writeHead(403);
+      res.end();
+      return;
+    }
 
   const getAllImagesQuery = 'SELECT * FROM images';
 
@@ -298,7 +299,6 @@ router.route('/images')
      res.json(result);
       }
     });
-  }
 });
 
 /*#############################################################################
