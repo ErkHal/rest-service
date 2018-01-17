@@ -24,6 +24,7 @@ const fs = require('fs');
 const formidable = require('formidable');
 const shortid = require('shortid');
 const utils = require('./utils.js');
+const url = require('url');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -87,10 +88,7 @@ router.route('/users')
 
 //=========================================================================
 //Query for creating a new entry in users table
-  const insertQuery = "INSERT INTO users(EMAIL, PASSWORD)" +
-  " VALUES (?, ?)";
-//=========================================================================
-  dbConnection.query(insertQuery, [email, passwd], (err, result) => {
+  dbConnection.query(utils.insertQuery, [email, passwd], (err, result) => {
     if(err) {
       console.log("Duplicate registering attempt on " + email);
       console.log(err.sqlMessage);
@@ -111,9 +109,7 @@ router.route('/users')
 
   if(utils.isLegit(req)) {
 
-  const getAllQuery = "SELECT * FROM users";
-
-  dbConnection.query(getAllQuery, (err, result) => {
+  dbConnection.query(utils.getAllQuery, (err, result) => {
 
     if(err) {
       console.log("Something fucked up at GET");
@@ -144,13 +140,10 @@ router.route('/login')
 
  //===========================================================================
  //Login query that checks the login credentials from the users table
-  const loginQuery = "SELECT * FROM users AS u WHERE "
-   + " ? = u.email AND ? = u.password";
-//===========================================================================
 
 /*If query returns an entry, update that entry with the token and send token as
  cookie to client */
-  dbConnection.query(loginQuery, [email, passwd] , (err, result) => {
+  dbConnection.query(utils.loginQuery, [email, passwd] , (err, result) => {
     if(err) {
       console.log("Something fucked up at LOGIN POST");
       console.log(err.sqlMessage);
@@ -167,12 +160,8 @@ router.route('/login')
         const token = sha512(email + passwd + Math.random()).toString('hex');
         //===================================================================
         //Query for setting the token into database entry
-        const setTokenQuery = "UPDATE users SET token = ? WHERE" +
-        " email = ? "
-        //===================================================================
 
-        //Adding token to database entry
-        dbConnection.query(setTokenQuery, [token, email] , (err, result) => {
+        dbConnection.query(utils.setTokenQuery, [token, email] , (err, result) => {
           if(err) {
             console.log('Token entry got fucked up. Pls fix');
             console.log(err);
@@ -244,10 +233,10 @@ router.route('/upload')
          } else {
          console.log('Uploaded ' + files.image.name);
          /* Query for inserting the entry about the uploaded image */
-            const uploadQuery = "INSERT INTO images(TITLE, FILEPATH)" +
-              " VALUES (?, ?)";
 
-            dbConnection.query(uploadQuery, [fields.title, newpath], (err, result) => {
+            dbConnection.query(utils.uploadQuery,
+                                 [fields.title, newpath],
+                                 (err, result) => {
 
               if(err) {
 
@@ -286,9 +275,7 @@ router.route('/images')
       return;
     }
 
-  const getAllImagesQuery = 'SELECT * FROM images';
-
-  dbConnection.query(getAllImagesQuery, (err, result) => {
+  dbConnection.query(utils.getAllImagesQuery, (err, result) => {
 
     if(err) {
      console.log('ERROR at image retrieval' + err);
@@ -300,6 +287,20 @@ router.route('/images')
       }
     });
 });
+
+/*############################################################################
+  Get single image with id
+*/
+
+router.route('/images/:id')
+
+.get((req, res) => {
+
+  const parsedUrl = url.parse(req.url, true);
+  console.log(parsedUrl.id);
+
+});
+
 
 /*#############################################################################
 --REGISTER OUR ROUTES -------------------------------
