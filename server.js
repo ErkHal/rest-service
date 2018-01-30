@@ -296,9 +296,26 @@ router.route('/images/:id')
 
 .get((req, res) => {
 
-  const parsedUrl = url.parse(req.url, true);
-  console.log(parsedUrl.id);
+  if(!utils.isAuthorized(req)) {
+    res.writeHead(403);
+    res.end();
+    return;
+  }
 
+  const mediaId = url.parse(req.url, true).path.split('/')[2];
+  console.log(mediaId);
+
+  dbConnection.query(utils.getSingleImageQuery, [mediaId], (err, result) => {
+
+    if(err) {
+     console.log('ERROR at image retrieval' + err);
+   } else {
+     res.header('Access-Control-Allow-Origin', '*');
+     res.header('Access-Control-Allow-Methods', 'GET');
+     res.header('Access-Control-Allow-Headers', 'Content-Type');
+     res.json(result);
+      }
+    });
 });
 
 

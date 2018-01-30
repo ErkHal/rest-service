@@ -15,6 +15,7 @@ module.exports = {
   loginQuery : "SELECT * FROM users AS u WHERE ? = u.email AND ? = u.password",
   getAllUsersQuery : "SELECT USERID, EMAIL, TOKEN FROM users",
   insertQuery : "INSERT INTO users(EMAIL, PASSWORD) VALUES (?, ?)",
+  getSingleImageQuery: "SELECT * FROM images AS img WHERE ? = img.PICID",
 
   isAuthorized : (request) => {
 
