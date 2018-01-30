@@ -107,9 +107,9 @@ router.route('/users')
 // Users need to be logged in to access this endpoint
 .get((req, res) => {
 
-  if(utils.isLegit(req)) {
+  if(utils.isAuthorized(req)) {
 
-  dbConnection.query(utils.getAllQuery, (err, result) => {
+  dbConnection.query(utils.getAllUsersQuery, (err, result) => {
 
     if(err) {
       console.log("Something fucked up at GET");
@@ -196,7 +196,7 @@ router.route('/upload')
 
 .post((req, res) => {
 
-  if(!utils.isLegit(req)) {
+  if(!utils.isAuthorized(req)) {
     res.writeHead(403);
     res.end();
     return;
@@ -269,7 +269,7 @@ router.route('/images')
 
 .get((req, res) => {
 
-    if(!utils.isLegit(req)) {
+    if(!utils.isAuthorized(req)) {
       res.writeHead(403);
       res.end();
       return;
