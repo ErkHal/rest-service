@@ -169,24 +169,15 @@ router.route('/login')
             res.end();
           } else {
 
-            res.cookie('authtoken', token, {maxAge: 90000, httpOnly: true});
-            console.log("Response and cookie sent to user " + email);
+            res.setHeader('x-access-token', token);
+            res.send(200);
+            console.log("token sent to user " + email);
             res.end();
           }
         });
       }
     }
   });
-});
-
-/*############################################################################
-  LOGOUT service (Deletes the cookie from the client)*/
-router.route('/logout')
-
-.delete((req, res) => {
-  res.clearCookie('authtoken');
-  res.end();
-  console.log("Cleared cookies !");
 });
 
 /*############################################################################
@@ -328,3 +319,13 @@ app.use('/api', router);
 // =============================================================================
 app.listen(port);
 console.log('Server listening on port ' + port);
+
+//#############################################################################
+async function queryDatabase(query, params) {
+  await dbConnection.query(query, params, (err, result) => {
+    if(err)
+      return err;
+    else
+      return result;
+  });
+}

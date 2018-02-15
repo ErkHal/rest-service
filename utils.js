@@ -17,9 +17,12 @@ module.exports = {
   insertQuery : "INSERT INTO users(EMAIL, PASSWORD) VALUES (?, ?)",
   getSingleImageQuery: "SELECT * FROM images AS img WHERE ? = img.PICID",
 
+  /*
+  * THIS FUNCTION IS STILL IN THE MAKING, THIS IS JUST A DUMMY VERIFICATION
+  */
   isAuthorized : (request) => {
 
-    const auth = request.cookies['authtoken'];
+    const auth = request.headers['x-access-token'];
 
     if(auth === undefined) {
       return false;
